@@ -1,0 +1,7 @@
+{
+  "name": "info-retrieval-frontend",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
