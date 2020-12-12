@@ -4,6 +4,7 @@ import { Connection, Model } from 'mongoose';
 import { Movie, MovieDto } from './movie.model';
 import * as csvToJson from 'csvtojson';
 import { SearchService } from 'src/search/search.service';
+import { RatingsService } from 'src/ratings/ratings.service';
 
 @Injectable()
 export class MovieService {
@@ -11,6 +12,7 @@ export class MovieService {
     @InjectConnection() private readonly connection: Connection,
     @InjectModel('Movie') private readonly movieModel: Model<Movie>,
     private readonly searchService: SearchService,
+    private readonly ratingsService: RatingsService,
   ) {}
 
   public async getMovies(): Promise<Movie[]> {
@@ -54,5 +56,15 @@ export class MovieService {
   public async deleteAll() {
     this.searchService.deleteIndexData();
     this.connection.dropDatabase();
+  }
+
+  public async searchQuestion2(searchQuery: string, userId: string) {
+    // Get all the users ratings
+    const userRatings = await this.ratingsService.getRatingsByUser(userId);
+    // Get the average rating for a movie
+
+    const avgRating = await this.ratingsService.getAvgMovieRating('1');
+
+    return { usrRat: userRatings, avg: avgRating, movie: await this.getMovie('1') };
   }
 }

@@ -57,4 +57,17 @@ export class RatingsService {
 
     return dbRes;
   }
+
+  public async getAvgMovieRating(movieId: string): Promise<any> {
+    const dbres = await this.ratingModel.aggregate([
+      { $match: { movieId: movieId } },
+      { $group: { _id: movieId, avgRating: { $avg: '$rating' } } },
+    ]);
+
+    const ratings = (await this.getRatingsByMovie(movieId)).map(rating => rating.rating);
+
+    const calculatedAvg = ratings.reduce((a, b) => a + b, 0) / ratings.length;
+
+    return { dbAvg: dbres, calculatedAvg };
+  }
 }

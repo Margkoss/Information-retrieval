@@ -54,4 +54,11 @@ export class MovieController {
       acknowledged: true,
     };
   }
+
+  @Get('/search/2')
+  @ApiQuery({ name: 'search_query', required: true })
+  @ApiQuery({ name: 'userId', required: true })
+  public async searchQuestion2(@Query('search_query') searchQuery: string, @Query('userId') userId: string) {
+    return await this.movieService.searchQuestion2(searchQuery, userId);
+  }
 }

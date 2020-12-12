@@ -2,6 +2,7 @@ import { HttpException, Injectable, Logger } from '@nestjs/common';
 import * as elasticsearch from 'elasticsearch';
 import { ConfigService } from '@nestjs/config';
 import { Movie } from 'src/movie/movie.model';
+import { RatingDto } from 'src/ratings/ratings.model';
 
 @Injectable()
 export class SearchService {
@@ -93,4 +94,19 @@ export class SearchService {
     await this.client.indices.delete({ index: this.config.get('ELASTICSEARCH_INDEX') });
     await this.createIndex();
   }
+
+  public async addRatingsMapping() {
+    await this.client.indices.putMapping({
+      index: this.config.get('ELASTICSEARCH_INDEX'),
+      includeTypeName: true,
+      type: '_doc',
+      body: {
+        properties: {
+          ratings: { type: 'float' },
+        },
+      },
+    });
+  }
+
+  public async searchQuestion2(userId: string, ratings: RatingDto[], avg: number) {}
 }

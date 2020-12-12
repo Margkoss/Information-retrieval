@@ -1,13 +1,14 @@
-import { Body, Controller, Get, Param, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express/multer/interceptors';
 import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { SearchService } from 'src/search/search.service';
 import { Rating, RatingDto } from './ratings.model';
 import { RatingsService } from './ratings.service';
 
 @ApiTags('Ratings')
 @Controller('ratings')
 export class RatingsController {
-  constructor(private readonly ratingsService: RatingsService) {}
+  constructor(private readonly ratingsService: RatingsService, private readonly searchService: SearchService) {}
 
   @Post('/csv')
   @UseInterceptors(FileInterceptor('file'))
@@ -45,5 +46,11 @@ export class RatingsController {
   @Post()
   public async postRating(@Body() rating: RatingDto) {
     return await this.ratingsService.postRating(rating);
+  }
+
+  @Put()
+  public async addRatingsMapping() {
+    await this.searchService.addRatingsMapping();
+    return { acknowleged: true };
   }
 }

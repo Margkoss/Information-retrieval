@@ -11,7 +11,7 @@ export const RatingSchema = new Schema({
 export interface Rating extends Document {
   userId: string;
   movieId: string;
-  rating: Number;
+  rating: number;
   timestamp: number;
 }
 
