@@ -5,6 +5,7 @@ import { MovieModule } from './movie/movie.module';
 import { ConfigModule } from '@nestjs/config';
 import { ConfigService } from '@nestjs/config';
 import { SearchModule } from './search/search.module';
+import { RatingsModule } from './ratings/ratings.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { SearchModule } from './search/search.module';
     ConfigModule.forRoot({ isGlobal: true }),
     MovieModule,
     SearchModule,
+    RatingsModule,
   ],
   controllers: [AppController],
   providers: [],

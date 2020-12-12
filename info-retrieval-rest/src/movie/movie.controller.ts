@@ -28,7 +28,7 @@ export class MovieController {
       },
     },
   })
-  public async postCsvFile(@UploadedFile() file): Promise<string[]> {
+  public async postCsvFile(@UploadedFile() file): Promise<any> {
     return await this.movieService.parseCsvFile(file.buffer);
   }
 

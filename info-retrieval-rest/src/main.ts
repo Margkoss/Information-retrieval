@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
+import * as rateLimit from 'express-rate-limit';
 
 async function bootstrap() {
   // Instatiate config service
@@ -10,6 +11,14 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   // Enable cors
   app.enableCors();
+
+  // Enable a global rate limiter for api calls
+  app.use(
+    rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes in miliseconds
+      max: 100, // limit each IP to 100 requests per windowMs
+    }),
+  );
 
   // Set a global prefix
   app.setGlobalPrefix(configService.get('GLOBAL_PREFIX'));
