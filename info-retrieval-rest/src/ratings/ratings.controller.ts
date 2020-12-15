@@ -53,4 +53,9 @@ export class RatingsController {
     await this.searchService.addRatingsMapping();
     return { acknowleged: true };
   }
+
+  @Post('/reindex')
+  public async reindex() {
+    return await this.ratingsService.reindex();
+  }
 }

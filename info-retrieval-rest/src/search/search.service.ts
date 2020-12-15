@@ -102,11 +102,67 @@ export class SearchService {
       type: '_doc',
       body: {
         properties: {
-          ratings: { type: 'float' },
+          ratings: { type: 'nested' },
+        },
+      },
+    });
+
+    await this.client.updateByQuery({
+      index: this.config.get('ELASTICSEARCH_INDEX'),
+      refresh: true,
+      type: '_doc',
+      body: {
+        script: {
+          lang: 'painless',
+          source: 'ctx._source.ratings = []',
         },
       },
     });
   }
 
-  public async searchQuestion2(userId: string, ratings: RatingDto[], avg: number) {}
+  public async searchQuestion2(userId: string, query: string) {
+    const body = {
+      size: 12,
+      query: {
+        function_score: {
+          query: {
+            match: {
+              title: {
+                query,
+              },
+            },
+          },
+          boost_mode: 'multiply',
+          script_score: {
+            script: {
+              lang: 'painless',
+              params: { userId: userId },
+              inline: `
+                double sum = 0.0;
+                boolean hasRated = false;
+                for ( rating in params._source.ratings ){ 
+
+                  if(params.userId == rating.userId){
+                    hasRated = true;
+                  }
+
+                  sum += rating.rating;
+                } 
+                if (params._source.ratings.length > 0){
+                  if(hasRated){
+                    return 2 * (sum / params._source.ratings.length);
+                  }else{
+                    return sum / params._source.ratings.length
+                  }
+                }else{
+                  return 0;
+                }`,
+            },
+          },
+        },
+      },
+    };
+
+    return await (await this.client.search({ index: this.config.get('ELASTICSEARCH_INDEX'), body })).hits.hits;
+  }
 }

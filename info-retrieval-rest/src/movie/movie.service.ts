@@ -5,6 +5,7 @@ import { Movie, MovieDto } from './movie.model';
 import * as csvToJson from 'csvtojson';
 import { SearchService } from 'src/search/search.service';
 import { RatingsService } from 'src/ratings/ratings.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class MovieService {
@@ -13,6 +14,7 @@ export class MovieService {
     @InjectModel('Movie') private readonly movieModel: Model<Movie>,
     private readonly searchService: SearchService,
     private readonly ratingsService: RatingsService,
+    private readonly config: ConfigService,
   ) {}
 
   public async getMovies(): Promise<Movie[]> {
@@ -59,12 +61,6 @@ export class MovieService {
   }
 
   public async searchQuestion2(searchQuery: string, userId: string) {
-    // Get all the users ratings
-    const userRatings = await this.ratingsService.getRatingsByUser(userId);
-    // Get the average rating for a movie
-
-    const avgRating = await this.ratingsService.getAvgMovieRating('1');
-
-    return { usrRat: userRatings, avg: avgRating, movie: await this.getMovie('1') };
+    return await this.searchService.searchQuestion2(userId, searchQuery);
   }
 }

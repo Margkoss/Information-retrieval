@@ -1,21 +1,31 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import * as csvToJson from 'csvtojson';
 import { Model } from 'mongoose';
+import { SearchService } from 'src/search/search.service';
 import { Rating, RatingDto } from './ratings.model';
 
 @Injectable()
 export class RatingsService {
-  constructor(@InjectModel('Ratings') private readonly ratingModel: Model<Rating>) {}
+  constructor(
+    @InjectModel('Ratings') private readonly ratingModel: Model<Rating>,
+    private readonly searchService: SearchService,
+    private config: ConfigService,
+  ) {}
 
   public async getRating(_id: string): Promise<Rating> {
     const res = await this.ratingModel.findById(_id);
 
     if (!res) {
-      throw new NotFoundException({ message: `Movie by _id ${_id} not found` });
+      throw new NotFoundException({ message: `Rating by _id ${_id} not found` });
     }
 
     return res;
+  }
+
+  public async getRatings(): Promise<Rating[]> {
+    return await this.ratingModel.find();
   }
 
   public async parseCsvFile(buffer: Buffer): Promise<any> {
@@ -69,5 +79,34 @@ export class RatingsService {
     const calculatedAvg = ratings.reduce((a, b) => a + b, 0) / ratings.length;
 
     return { dbAvg: dbres, calculatedAvg };
+  }
+
+  public async reindex() {
+    const ratings = await this.getRatings();
+
+    let body = [];
+    ratings.forEach(rating => {
+      body.push(
+        { update: { _id: rating.movieId, _index: 'movie-index', retry_on_conflict: 3 } },
+        {
+          script: {
+            source: 'ctx._source.ratings.add(params.rating)',
+            lang: 'painless',
+            params: { rating: { rating: rating.rating, timestamp: rating.timestamp, userId: rating.userId } },
+          },
+        },
+      );
+    });
+
+    try {
+      const res = await this.searchService.clientInstance.bulk({
+        index: this.config.get('ELASTICSEARCH_INDEX'),
+        body,
+      });
+    } catch (e) {
+      console.error(e);
+    }
+
+    return { acknowledged: true };
   }
 }
