@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import * as csvToJson from 'csvtojson';
 import { Model } from 'mongoose';
+import { MovieService } from 'src/movie/movie.service';
 import { SearchService } from 'src/search/search.service';
 import { Rating, RatingDto } from './ratings.model';
 
@@ -24,8 +25,16 @@ export class RatingsService {
     return res;
   }
 
-  public async getRatings(): Promise<Rating[]> {
-    return await this.ratingModel.find();
+  public async getRatings(populated?: boolean): Promise<Rating[]> {
+    if (populated) {
+      return await this.ratingModel.find().populate('movieId');
+    } else {
+      return await this.ratingModel.find();
+    }
+  }
+
+  public async getDistinctUsers(): Promise<number[]> {
+    return await this.ratingModel.find().distinct('userId');
   }
 
   public async parseCsvFile(buffer: Buffer): Promise<any> {
@@ -43,6 +52,10 @@ export class RatingsService {
 
     const dbres = await this.ratingModel.insertMany(ratings);
     return { inserted: dbres.length, total: ratingsRows.length, response: 'OK' };
+  }
+
+  public async insertMany(ratings): Promise<any> {
+    return await this.ratingModel.insertMany(ratings);
   }
 
   public async postRating(rating: RatingDto): Promise<Rating> {

@@ -10,5 +10,6 @@ import { MovieService } from './movie.service';
   imports: [RatingsModule, MongooseModule.forFeature([{ name: 'Movie', schema: MovieSchema }]), SearchModule],
   providers: [MovieService],
   controllers: [MovieController],
+  exports: [MovieService],
 })
 export class MovieModule {}

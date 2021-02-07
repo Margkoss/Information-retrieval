@@ -1,5 +1,6 @@
 import { Document, Schema } from 'mongoose';
 import { ApiProperty } from '@nestjs/swagger';
+import { Movie } from 'src/movie/movie.model';
 
 export const RatingSchema = new Schema({
   userId: { type: String, required: true },

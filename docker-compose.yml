@@ -1,16 +1,6 @@
 version: "3.7"
 
 services:
-  frontend:
-    container_name: frontend
-    build:
-      context: info-retrieval-frontend
-    ports:
-      - 80:80
-    depends_on:
-      - rest-api
-      - elasticsearch
-      - mongo
   elasticsearch:
     container_name: elasticsearch
     image: docker.elastic.co/elasticsearch/elasticsearch:7.9.3

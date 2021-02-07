@@ -4,7 +4,6 @@ import { Connection, Model } from 'mongoose';
 import { Movie, MovieDto } from './movie.model';
 import * as csvToJson from 'csvtojson';
 import { SearchService } from 'src/search/search.service';
-import { RatingsService } from 'src/ratings/ratings.service';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -13,7 +12,6 @@ export class MovieService {
     @InjectConnection() private readonly connection: Connection,
     @InjectModel('Movie') private readonly movieModel: Model<Movie>,
     private readonly searchService: SearchService,
-    private readonly ratingsService: RatingsService,
     private readonly config: ConfigService,
   ) {}
 
